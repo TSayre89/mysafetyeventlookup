@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mySafety Universal Event Lookup</title>
+  <style>
+    :root {
+      --pm-green: #007A3D;
+      --pm-green-dark: #005E2F;
+      --pm-green-soft: #EAF6EF;
+      --wf-blue: #2563EB;
+      --wf-blue-soft: #EFF6FF;
+      --warning: #B45309;
+      --warning-soft: #FEF3C7;
+      --bg: #F6F8F7;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --muted: #6B7280;
+      --border: #D9E1DD;
+      --shadow: 0 8px 24px rgba(31, 41, 55, .08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(0,122,61,.10), transparent 34rem),
+        linear-gradient(180deg, #fff, var(--bg) 16rem);
+      color: var(--text);
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, var(--pm-green), #00A35A);
+      color: white;
+      padding: 24px 28px;
+      box-shadow: 0 4px 20px rgba(0, 122, 61, .22);
+    }
+
+    .topbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .logo-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: white;
+      color: var(--pm-green);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 24px;
+      flex: 0 0 auto;
+      box-shadow: 0 8px 16px rgba(0,0,0,.12);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      opacity: .92;
+      font-size: 14px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      font: inherit;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: white;
+      color: var(--text);
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease, border .12s ease;
+      white-space: nowrap;
+    }
+
+    button:hover { background: var(--pm-green-soft); border-color: #B9DCC7; }
+    button:active { transform: translateY(1px); }
+
+    .top-actions button {
+      background: rgba(255,255,255,.16);
+      border-color: rgba(255,255,255,.35);
+      color: white;
+    }
+
+    .top-actions button:hover { background: rgba(255,255,255,.25); }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 26px auto 46px;
+      padding: 0 20px;
+    }
+
+    .notice-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .intro, .quick-guide, .search-panel, .stats, .empty {
+      background: rgba(255,255,255,.94);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .intro, .quick-guide {
+      padding: 18px 20px;
+    }
+
+    .intro strong, .quick-guide strong {
+      color: var(--pm-green-dark);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .intro p, .quick-guide p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .quick-guide ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .search-panel {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 18px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(6px);
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      color: var(--pm-green-dark);
+      margin: 0 0 8px;
+    }
+
+    .search-input-wrap {
+      position: relative;
+    }
+
+    #searchInput {
+      width: 100%;
+      font-size: 22px;
+      line-height: 1.2;
+      padding: 16px 52px 16px 18px;
+      border: 2px solid #C9D6CF;
+      border-radius: 16px;
+      outline: none;
+      background: white;
+    }
+
+    #searchInput:focus {
+      border-color: var(--pm-green);
+      box-shadow: 0 0 0 4px rgba(0,122,61,.14);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      font-size: 22px;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      align-items: center;
+    }
+
+    .chip {
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .chip.active {
+      color: white;
+      background: var(--pm-green);
+      border-color: var(--pm-green);
+      font-weight: 700;
+    }
+
+    .chip.patient.active { background: var(--pm-green); }
+    .chip.workforce.active { background: var(--wf-blue); border-color: var(--wf-blue); }
+
+    .helper-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .examples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .example {
+      border: 0;
+      background: var(--pm-green-soft);
+      color: var(--pm-green-dark);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .stats {
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .stat {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat b {
+      display: block;
+      color: var(--text);
+      font-size: 21px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .results {
+      display: grid;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 7px solid var(--pm-green);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 5px 18px rgba(31, 41, 55, .06);
+      animation: pop .15s ease;
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card.workforce { border-left-color: var(--wf-blue); }
+    .card.patient { border-left-color: var(--pm-green); }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .title-block h2 {
+      margin: 0 0 6px;
+      font-size: 21px;
+      line-height: 1.2;
+      color: #111827;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: #F9FAFB;
+      color: #374151;
+    }
+
+    .badge.patient {
+      background: var(--pm-green-soft);
+      color: var(--pm-green-dark);
+      border-color: #B9DCC7;
+    }
+
+    .badge.workforce {
+      background: var(--wf-blue-soft);
+      color: #1D4ED8;
+      border-color: #BFDBFE;
+    }
+
+    .score {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 8px 14px;
+      line-height: 1.45;
+    }
+
+    .field {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .value { color: var(--text); }
+
+    .guidance {
+      margin-top: 12px;
+      padding: 11px 12px;
+      background: var(--warning-soft);
+      border: 1px solid #FCD34D;
+      border-radius: 12px;
+      color: #78350F;
+      line-height: 1.35;
+      font-size: 14px;
+    }
+
+    details {
+      margin-top: 12px;
+      border-top: 1px solid #EEF2F0;
+      padding-top: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .aliases {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 9px;
+    }
+
+    .alias {
+      background: #F3F4F6;
+      border: 1px solid #E5E7EB;
+      color: #374151;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    mark {
+      background: #FFF1A6;
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      border-style: dashed;
+    }
+
+    .empty h3 {
+      color: var(--text);
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .suggestions {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .suggestion {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 999px;
+      padding: 7px 10px;
+      cursor: pointer;
+      color: var(--pm-green-dark);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .footer {
+      margin: 26px 4px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    @media (max-width: 860px) {
+      .topbar-inner, .notice-grid, .search-row, .stats { grid-template-columns: 1fr; }
+      .topbar-inner { align-items: flex-start; }
+      .top-actions { justify-content: flex-start; }
+      .search-panel { position: static; }
+      .stats { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .topbar { padding: 18px 16px; }
+      .wrap { padding: 0 14px; }
+      .card-head { flex-direction: column; }
+      .details { grid-template-columns: 1fr; gap: 3px; }
+      .field { margin-top: 8px; }
+      #searchInput { font-size: 18px; padding-right: 44px; }
+      .intro, .quick-guide, .search-panel, .card { border-radius: 14px; }
+    }
+
+    @media print {
+      .top-actions, .search-panel, .filter-bar, .examples, button, details { display: none !important; }
+      body { background: white; }
+      .topbar { background: white; color: black; box-shadow: none; border-bottom: 2px solid #ddd; }
+      .logo-mark { box-shadow: none; border: 1px solid #ddd; }
+      .card { break-inside: avoid; box-shadow: none; }
+      .wrap { max-width: none; margin: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo-mark">✓</div>
+        <div>
+          <h1>mySafety Universal Event Lookup</h1>
+          <p>Search Patient Safety + Workforce Safety routing in one simple tool.</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="printBtn">Print</button>
+        <button type="button" id="showAllBtn">Show all</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="notice-grid">
+      <div class="intro">
+        <strong>Type what happened — the tool will suggest where it most likely belongs.</strong>
+        <p>Use everyday words like <b>slipped</b>, <b>aggressive</b>, <b>needle stick</b>, <b>blood</b>, <b>employee injury</b>, or <b>wrong patient</b>.</p>
+      </div>
+      <div class="quick-guide">
+        <strong>Routing reminder</strong>
+        <ul>
+          <li><b>Patient/visitor issue:</b> usually Patient Safety.</li>
+          <li><b>Employee injury/exposure/violence:</b> usually Workforce Safety.</li>
+          <li>When unsure, use notes shown on the result card.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="search-panel">
+      <label for="searchInput">Search event keywords</label>
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <input id="searchInput" type="search" placeholder="Example: slipped, aggressive, needlestick, blood..." autocomplete="off" autofocus />
+          <span class="search-icon">⌕</span>
+        </div>
+        <button id="clearBtn" type="button">Clear</button>
+      </div>
+
+      <div class="filter-bar" aria-label="Module filters">
+        <span class="chip active" data-module="All">All modules</span>
+        <span class="chip patient" data-module="Patient Safety">Patient Safety</span>
+        <span class="chip workforce" data-module="Workforce Safety">Workforce Safety</span>
+      </div>
+
+      <div class="helper-row">
+        <span id="count">Ready.</span>
+        <div class="examples">
+          <span>Try:</span>
+          <button type="button" class="example" data-q="slipped">slipped</button>
+          <button type="button" class="example" data-q="aggressive">aggressive</button>
+          <button type="button" class="example" data-q="needle stick">needle stick</button>
+          <button type="button" class="example" data-q="wrong patient">wrong patient</button>
+          <button type="button" class="example" data-q="blood">blood</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Tool summary">
+      <div class="stat"><span>📚</span><span><b id="totalCategories">0</b>Categories</span></div>
+      <div class="stat"><span>🩺</span><span><b id="patientCategories">0</b>Patient Safety</span></div>
+      <div class="stat"><span>🛡️</span><span><b id="workforceCategories">0</b>Workforce Safety</span></div>
+    </section>
+
+    <section id="results" class="results" aria-live="polite"></section>
+
+    <div class="footer">
+      This lookup is intended as a quick routing aid. Follow current mySafety guidance, policy, and leadership direction when entering events.
+    </div>
+  </main>
+
+  <script>
+    const DATA = [{"module": "Patient Safety", "primaryCategory": "Behavior", "aliases": ["Behavior", "ama", "left ama", "against medical advice", "lwbs", "left without being seen", "eloped", "elopement", "ran away", "left unit", "wander", "wandering", "combative", "aggressive", "hostile", "verbal abuse", "refused care", "refusal of care", "restraint", "suicide", "suicidal", "self harm"], "notes": "If EMPLOYEE involved → use Workforce Safety Quick Search."}, {"module": "Patient Safety", "primaryCategory": "Blood or Blood Product", "aliases": ["Blood or Blood Product", "blood", "transfusion", "rbc", "platelets", "plasma"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Care Coordination (patient code)", "aliases": ["Care Coordination (patient code)"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Consent and Documentation", "aliases": ["Consent and Documentation", "consent", "missing consent", "documentation"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Device or Medical/Surgical Supply, including Health Information Technology (HIT)", "aliases": ["Device or Medical/Surgical Supply, including Health Information Technology (HIT)"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Diagnosis Related", "aliases": ["Diagnosis Related"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Environment", "aliases": ["Environment", "power outage", "network outage", "water leak", "spill", "elevator", "fire alarm"], "notes": "If EMPLOYEE involved → use Workforce Safety Quick Search."}, {"module": "Patient Safety", "primaryCategory": "Fall", "aliases": ["Fall", "fell", "slip", "slipped", "trip", "tripped", "stumble", "stumbled", "lost balance", "found on floor", "fall from bed", "fell out of bed", "chair fall", "bathroom fall", "toilet fall"], "notes": "If EMPLOYEE involved → use Workforce Safety Quick Search."}, {"module": "Patient Safety", "primaryCategory": "Healthcare-associated Infection", "aliases": ["Healthcare-associated Infection", "hai", "hospital acquired infection", "cauti", "clabsi", "ssi", "c diff", "cdiff", "pneumonia", "uti"], "notes": "If EMPLOYEE involved → use Workforce Safety Quick Search."}, {"module": "Patient Safety", "primaryCategory": "IV and Line Related", "aliases": ["IV and Line Related", "iv", "iv line", "line", "iv pulled", "line pulled", "iv dislodged", "infiltration", "extravasation", "phlebitis", "air embolism"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Infection Related", "aliases": ["Infection Related", "infection prevention", "isolation", "ppe", "hand hygiene", "sterile technique", "sharps safety"], "notes": "If EMPLOYEE involved → use Workforce Safety Quick Search."}, {"module": "Patient Safety", "primaryCategory": "Medication or Other Substance", "aliases": ["Medication or Other Substance", "med error", "medication error", "wrong med", "wrong medication", "missed dose", "overdose", "contrast"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Nutrition", "aliases": ["Nutrition"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Patient Identification / HIPPA", "aliases": ["Patient Identification / HIPPA", "hipaa", "wrong patient", "wrong chart"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Perinatal", "aliases": ["Perinatal"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Respiratory Care", "aliases": ["Respiratory Care"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Security", "aliases": ["Security", "threat", "weapon", "code silver", "visitor injury", "visitor fall"], "notes": "If EMPLOYEE involved → use Workforce Safety Quick Search."}, {"module": "Patient Safety", "primaryCategory": "Skin/Pressure Injury", "aliases": ["Skin/Pressure Injury", "skin tear", "pressure sore", "pressure ulcer", "bedsore", "pressure injury", "pi", "burn", "scald", "blister", "bruise", "abrasion", "laceration", "cut", "puncture", "wound", "rash", "hives"], "notes": "If EMPLOYEE involved → use Workforce Safety Quick Search."}, {"module": "Patient Safety", "primaryCategory": "Surgery or Anesthesia (includes invasive procedure)", "aliases": ["Surgery or Anesthesia (includes invasive procedure)"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Testing (Lab/Radiology)", "aliases": ["Testing (Lab/Radiology)", "lab", "lab error", "specimen", "specimen lost", "wrong patient lab", "radiology", "imaging", "mri"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Treatment or Procedure", "aliases": ["Treatment or Procedure"], "notes": ""}, {"module": "Patient Safety", "primaryCategory": "Venous Thromboembolism", "aliases": ["Venous Thromboembolism"], "notes": ""}, {"module": "Workforce Safety", "primaryCategory": "Adverse Drug or Vaccine Reaction", "aliases": ["Adverse Drug or Vaccine Reaction"], "notes": "If PATIENT or VISITOR was involved → use Patient Safety Quick Search."}, {"module": "Workforce Safety", "primaryCategory": "Auto accident", "aliases": ["Auto accident", "car accident", "vehicle accident", "crash", "mvc", "Collision with another vehicle", "Collision with fixed object", "Collision with Pedestrian", "Single vehicle accident"], "notes": "Auto subtype"}, {"module": "Workforce Safety", "primaryCategory": "Burn", "aliases": ["Burn", "burned", "burnt", "scald", "steam", "Chemical", "Electrical", "Fire/Flame", "Fluids/Steam - Hot", "Object - Cold", "Object - Hot/Heat", "Radiation"], "notes": "If PATIENT or VISITOR was involved → use Patient Safety Quick Search."}, {"module": "Workforce Safety", "primaryCategory": "Electric shock", "aliases": ["Electric shock", "shock", "shocked", "electrical", "electrocution"], "notes": "If PATIENT or VISITOR was involved → use Patient Safety Quick Search."}, {"module": "Workforce Safety", "primaryCategory": "Exposure (Body Fluid, Blood, Chemical, Material, etc.)", "aliases": ["Exposure (Body Fluid, Blood, Chemical, Material, etc.)", "exposure", "blood exposure", "body fluid", "splash", "opim", "bbp", "chemical exposure", "chemo exposure", "latex", "fumes", "Air Quality", "Body fluids/Blood", "Chemicals", "Chemotherapy/Illicit Drugs", "Material (i.e., latex)", "Noise", "Radiation"], "notes": "If PATIENT or VISITOR was involved → use Patient Safety Quick Search."}, {"module": "Workforce Safety", "primaryCategory": "Infectious or Communicable Disease (Lice, MRSA, COVID, Bed Bugs, Virus, etc.)", "aliases": ["Infectious or Communicable Disease (Lice, MRSA, COVID, Bed Bugs, Virus, etc.)", "covid", "mrsa", "flu", "lice", "bed bugs", "Brucella", "Chicken Pox", "COVID-19", "Gastroenteritis", "Head Lice", "Influenza", "Legionella", "Measles", "Meningitis", "Mumps", "Pertussis", "Scabies", "Tuberculosis", "Varicella"], "notes": "If PATIENT or VISITOR was involved → use Patient Safety Quick Search."}, {"module": "Workforce Safety", "primaryCategory": "Needlestick/Scalpel/Sharps", "aliases": ["Needlestick/Scalpel/Sharps", "needlestick", "needle stick", "needle prick", "stuck", "stuck with needle", "poke", "sharps", "sharp", "scalpel", "suture needle", "butterfly", "hypodermic", "iv cath", "phlebotomy", "Butterfly needle", "Hypodermic needle", "IV Cath needle", "Phlebotomy needle", "Surgical instrument"], "notes": "Device type"}, {"module": "Workforce Safety", "primaryCategory": "Other General Type of Injury: Please specify", "aliases": ["Other General Type of Injury: Please specify", "ouch line", "ouchline", "ouch", "877-880-6924", "8778806924", "occ health", "occhealth", "occupational health", "employee health", "workforce safety team", "workers comp", "workers' comp", "workers compensation", "osha 301", "osha", "miosha", "first aid", "360 health", "emergency department", "ed"], "notes": ""}, {"module": "Workforce Safety", "primaryCategory": "Puncture/Laceration/Animal Bite-Scratch-Sting", "aliases": ["Puncture/Laceration/Animal Bite-Scratch-Sting", "puncture", "laceration", "cut", "bite", "scratch", "sting", "Animal Bite-Scratch-Sting", "Knife/Blade/Scalpel", "Equipment/Structure (i.e., shelf, cabinet)", "Scissors", "Hand Tool"], "notes": "If PATIENT or VISITOR was involved → use Patient Safety Quick Search."}, {"module": "Workforce Safety", "primaryCategory": "Slip/Trip/Fall", "aliases": ["Slip/Trip/Fall", "fall", "fell", "slip", "slipped", "trip", "tripped", "lost balance", "wet floor", "ice", "snow", "stairs", "ladder", "Slip - no fall", "Trip - no fall", "Involving objects (i.e, cords, tubing, furniture, etc.)", "Equipment / furniture", "Ice/snow (weather related)", "Ladder/scaffold", "Stairs / curbs", "Steep Incline", "Uneven/Damaged surface", "Wet/Slippery floor (Liquid or Grease)", "No Hazard Present"], "notes": "If PATIENT or VISITOR was involved → use Patient Safety Quick Search."}, {"module": "Workforce Safety", "primaryCategory": "Sprain/Strain/Repetitive Motion (Patient Handling, Objects, Equipment)", "aliases": ["Sprain/Strain/Repetitive Motion (Patient Handling, Objects, Equipment)", "sprain", "strain", "overexertion", "patient handling", "lifting", "Bending", "Climbing", "Holding or Carrying", "Jumping", "Kneeling", "Lifting/Lowering", "Push/pull", "Reaching", "Repetitive motion", "Squatting", "Twisting/Pivoting"], "notes": "Subtype"}, {"module": "Workforce Safety", "primaryCategory": "Struck By/Struck Against/Caught In - Object or Equipment", "aliases": ["Struck By/Struck Against/Caught In - Object or Equipment", "hit", "hit by", "struck", "caught", "pinched", "door", "iv pole", "cart", "Struck By", "Mobile Equipment (Carts, IV Poles, Stretchers, Wheelchairs)", "Door/Elevator Door", "Falling/flying object", "Equipment-hand tools", "Equipment-Moving Parts", "Struck Against", "Door/Door Frame/Elevator Door", "Fixed Object (Overhead Cabinet, Wall Mounted Object, Shelving)", "Equipment (Bed, IV Pole, Cart, Chair)", "Wall", "Caught In", "Equipment", "Doors/Drawers/Cabinets"], "notes": "If PATIENT or VISITOR was involved → use Patient Safety Quick Search."}, {"module": "Workforce Safety", "primaryCategory": "Workforce Medical Event (e.g., Illness, Seizure, Stroke, Heart Attack)", "aliases": ["Workforce Medical Event (e.g., Illness, Seizure, Stroke, Heart Attack)", "dizzy", "dizziness", "faint", "syncope", "Heart-Attack", "Seizure", "Stroke", "Unknown Medical Condition"], "notes": "Medical event type"}, {"module": "Workforce Safety", "primaryCategory": "Workplace Violence", "aliases": ["Workplace Violence", "violence", "bullying", "harassment", "threat", "intimidation", "punched", "kicked", "Physical assaults", "Sabotage", "Sexual Assault", "Sexual harassment", "Threatening, intimidating, harassing, or humiliating", "Verbal, nonverbal, written", "Assaulted By", "Patient", "Fellow Worker", "Visitor", "Type of Assault", "Patient to Staff", "Staff to Staff", "Staff to Patient", "Staff to Property/Environment", "Staff to Visitor"], "notes": "Assaulted by Section Type of assault Workplace violence type"}];
+
+    const searchInput = document.getElementById('searchInput');
+    const results = document.getElementById('results');
+    const count = document.getElementById('count');
+    const clearBtn = document.getElementById('clearBtn');
+    const showAllBtn = document.getElementById('showAllBtn');
+    const printBtn = document.getElementById('printBtn');
+    const chips = Array.from(document.querySelectorAll('.chip'));
+    let activeModule = 'All';
+
+    document.getElementById('totalCategories').textContent = DATA.length;
+    document.getElementById('patientCategories').textContent = DATA.filter(r => r.module === 'Patient Safety').length;
+    document.getElementById('workforceCategories').textContent = DATA.filter(r => r.module === 'Workforce Safety').length;
+
+    function normalize(text) {
+      return String(text || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/hippa/g, 'hipaa')
+        .replace(/needle\s*stick/g, 'needlestick')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function unique(arr) {
+      const seen = new Set();
+      return arr.filter(x => {
+        const key = normalize(x);
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function highlight(text, term) {
+      const safe = escapeHtml(text);
+      const raw = String(term || '').trim();
+      if (!raw) return safe;
+      const words = raw.split(/\s+/).filter(Boolean).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      if (!words.length) return safe;
+      const regex = new RegExp('(' + words.join('|') + ')', 'gi');
+      return safe.replace(regex, '<mark>$1</mark>');
+    }
+
+    function levenshtein(a, b) {
+      a = normalize(a); b = normalize(b);
+      if (!a || !b) return Math.max(a.length, b.length);
+      const dp = Array.from({length: a.length + 1}, () => new Array(b.length + 1).fill(0));
+      for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+      for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+      for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+          const cost = a[i-1] === b[j-1] ? 0 : 1;
+          dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + cost);
+        }
+      }
+      return dp[a.length][b.length];
+    }
+
+    function scoreRecord(row, query) {
+      if (activeModule !== 'All' && row.module !== activeModule) return null;
+
+      const q = normalize(query);
+      const allAliases = unique([row.primaryCategory, row.module, row.notes, ...row.aliases]);
+      const haystack = normalize(allAliases.join(' '));
+      const words = q.split(' ').filter(Boolean);
+
+      if (!q) return {
+        row, score: 1, matches: row.aliases.slice(0, 6)
+      };
+
+      let score = 0;
+      let matches = [];
+
+      for (const alias of allAliases) {
+        const a = normalize(alias);
+        if (!a) continue;
+
+        if (a === q) { score += 140; matches.push(alias); }
+        else if (a.startsWith(q)) { score += 90; matches.push(alias); }
+        else if (a.includes(q)) { score += 65; matches.push(alias); }
+
+        for (const word of words) {
+          if (word.length < 2) continue;
+          if (a === word) score += 30;
+          else if (a.startsWith(word)) score += 20;
+          else if (a.includes(word)) score += 12;
+          else if (word.length >= 5 && levenshtein(word, a.split(' ')[0]) <= 1) score += 8;
+        }
+      }
+
+      if (row.module.toLowerCase().includes('patient') && /(patient|visitor)/i.test(query)) score += 18;
+      if (row.module.toLowerCase().includes('workforce') && /(employee|staff|worker|workforce|occupational)/i.test(query)) score += 28;
+      if (haystack.includes(q)) score += 25;
+
+      // More likely to be direct/useful if exact category or alias matched.
+      matches = unique(matches).slice(0, 8);
+
+      if (score <= 0) return null;
+      return { row, score, matches };
+    }
+
+    function getSuggestions(query) {
+      const q = normalize(query);
+      if (!q || q.length < 3) return [];
+      const aliases = unique(DATA.flatMap(r => [r.primaryCategory, ...r.aliases]));
+      return aliases
+        .map(alias => {
+          const a = normalize(alias);
+          const d = Math.min(
+            levenshtein(q, a),
+            ...a.split(' ').map(part => levenshtein(q, part))
+          );
+          return { alias, d };
+        })
+        .filter(x => x.d <= Math.max(1, Math.floor(q.length / 3)))
+        .sort((a,b) => a.d - b.d || a.alias.length - b.alias.length)
+        .slice(0, 5)
+        .map(x => x.alias);
+    }
+
+    function moduleClass(module) {
+      return module === 'Workforce Safety' ? 'workforce' : 'patient';
+    }
+
+    function moduleIcon(module) {
+      return module === 'Workforce Safety' ? '🛡️' : '🩺';
+    }
+
+    function render() {
+      const q = searchInput.value.trim();
+      let scored = DATA.map(row => scoreRecord(row, q)).filter(Boolean);
+
+      if (q) scored.sort((a,b) => b.score - a.score || a.row.module.localeCompare(b.row.module) || a.row.primaryCategory.localeCompare(b.row.primaryCategory));
+      else scored.sort((a,b) => a.row.module.localeCompare(b.row.module) || a.row.primaryCategory.localeCompare(b.row.primaryCategory));
+
+      const display = scored.slice(0, q ? 20 : 60);
+      count.textContent = q
+        ? `${scored.length} result${scored.length === 1 ? '' : 's'} for “${q}”`
+        : `${scored.length} categories shown`;
+
+      if (!display.length) {
+        const suggestions = getSuggestions(q);
+        results.innerHTML = `
+          <div class="empty">
+            <h3>No matching event category found</h3>
+            <p>Try a broader word, or search by who was involved: patient, visitor, employee, staff.</p>
+            ${suggestions.length ? `<div class="suggestions"><span>Did you mean:</span> ${suggestions.map(s => `<button class="suggestion" data-q="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>` : ''}
+          </div>
+        `;
+        attachSuggestionHandlers();
+        return;
+      }
+
+      results.innerHTML = display.map(item => {
+        const r = item.row;
+        const klass = moduleClass(r.module);
+        const shownAliases = unique(item.matches.length ? item.matches : r.aliases).slice(0, 14);
+        const allAliases = unique(r.aliases);
+        const guidance = r.notes && r.notes.trim() ? r.notes : '';
+        return `
+          <article class="card ${klass}">
+            <div class="card-head">
+              <div class="title-block">
+                <h2>${highlight(r.primaryCategory, q)}</h2>
+                <div class="badges">
+                  <span class="badge ${klass}">${moduleIcon(r.module)} ${escapeHtml(r.module)}</span>
+                  ${guidance ? `<span class="badge">⚠️ Routing note</span>` : ''}
+                </div>
+              </div>
+              <div class="score">${q ? `Match score: ${item.score}` : ''}</div>
+            </div>
+
+            <div class="details">
+              <div class="field">Module</div>
+              <div class="value">${escapeHtml(r.module)}</div>
+
+              <div class="field">Category</div>
+              <div class="value">${highlight(r.primaryCategory, q)}</div>
+
+              <div class="field">Matched terms</div>
+              <div class="value">${shownAliases.map(a => `<span class="alias">${highlight(a, q)}</span>`).join(' ')}</div>
+            </div>
+
+            ${guidance ? `<div class="guidance"><b>Use caution:</b> ${highlight(guidance, q)}</div>` : ''}
+
+            <details>
+              <summary>Show all searchable terms for this result</summary>
+              <div class="aliases">${allAliases.map(a => `<span class="alias">${highlight(a, q)}</span>`).join('')}</div>
+            </details>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function attachSuggestionHandlers() {
+      document.querySelectorAll('.suggestion').forEach(btn => {
+        btn.addEventListener('click', () => {
+          searchInput.value = btn.dataset.q || '';
+          render();
+          searchInput.focus();
+        });
+      });
+    }
+
+    searchInput.addEventListener('input', render);
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      activeModule = 'All';
+      chips.forEach(c => c.classList.toggle('active', c.dataset.module === 'All'));
+      render();
+      searchInput.focus();
+    });
+    showAllBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      render();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+    printBtn.addEventListener('click', () => window.print());
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        activeModule = chip.dataset.module;
+        chips.forEach(c => c.classList.toggle('active', c === chip));
+        render();
+      });
+    });
+
+    document.querySelectorAll('.example').forEach(btn => {
+      btn.addEventListener('click', () => {
+        searchInput.value = btn.dataset.q || '';
+        render();
+        searchInput.focus();
+      });
+    });
+
+    // Keyboard shortcut: "/" jumps to search.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
